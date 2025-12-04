@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Despesas de Viagem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===================== CSS ===================== -->
+  <style>
+    /* RESET */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body.page {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a1a;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ============ LOGIN ============ */
+    .login-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e5f92, #3b8cc5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 380px;
+      background: #fff;
+      padding: 20px 18px;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: #1e5f92;
+      margin-bottom: 10px;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    .login-title {
+      font-weight: bold;
+      color: #1e5f92;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+      color: #555;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .login-form input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccd3dd;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .login-form input:focus {
+      border-color: #1e5f92;
+      box-shadow: 0 0 0 2px rgba(30, 95, 146, 0.15);
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px;
+      background: #1e5f92;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .login-error {
+      font-size: 12px;
+      color: #c5221f;
+      margin-top: 4px;
+      display: none;
+    }
+
+    /* ============ TOPO APP ============ */
+    .topbar {
+      background: #1e5f92;
+      color: #fff;
+      padding: 16px 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar h2 {
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .topbar p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .topbar-user {
+      font-size: 11px;
+      opacity: 0.85;
+    }
+
+    .logout-link {
+      margin-top: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .topbar-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.18);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+    }
+
+    /* ============ PÁGINAS ============ */
+    .page-view {
+      display: none;
+      padding: 16px 16px 80px;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    .subheader {
+      font-size: 20px;
+      color: #1e5f92;
+      margin-bottom: 8px;
+    }
+
+    /* ============ CARDS DASHBOARD ============ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: -32px;
+      padding: 0 4px 12px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h4 {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .card .value {
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .card-green {
+      background: #8bd897;
+      color: #0a2d12;
+    }
+
+    .card-yellow {
+      background: #f3d686;
+      color: #5a3d00;
+    }
+
+    .card-balance {
+      grid-column: span 2;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-balance .tag {
+      align-self: flex-start;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    .section-header h4 {
+      font-size: 15px;
+    }
+
+    /* ============ LISTAS ============ */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .list-item {
+      background: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .list-item-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .list-item-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .list-item-sub {
+     	font-size: 11px;
+        color: #555;
+    }
+
+    .list-item-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* ============ FORMULÁRIOS ============ */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .form label {
+      font-size: 13px;
+      color: #444;
+    }
+
+    .form input,
+    .form select {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccd3dd;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    .form input:focus,
+    .form select:focus {
+      border-color: #1e5f92;
+      box-shadow: 0 0 0 2px rgba(30, 95, 146, 0.15);
+    }
+
+    .btn-danger {
+      background: #d93025;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-white {
+      background: #fff;
+      border: 1px solid #ccd3dd;
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: #1e5f92;
+      font-size: 13px;
+    }
+
+    .btn-white:active,
+    .btn-danger:active {
+      transform: scale(0.98);
+    }
+
+    .edit-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* ============ HISTÓRICO ============ */
+    .list-historico .hist-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hist-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hist-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .hist-sub {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .hist-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .hist-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    /* ============ FILTROS ============ */
+    .filters {
+      margin: 8px 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* ============ GESTÃO ============ */
+    .gestao-card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 12px;
+    }
+
+    .gestao-card h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #1e5f92;
+    }
+
+    .gestao-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 80px;
+    }
+
+    .gestao-item {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gestao-item-main {
+      font-size: 13px;
+    }
+
+    .gestao-item-main b {
+      font-size: 14px;
+    }
+
+    .gestao-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ============ MODAL ============ */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 20px 16px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-box h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .modal-box p {
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ============ BOTTOM NAV ============ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #fff;
+      border-top: 1px solid #d7dde6;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .bottom-nav button {
+      border: none;
+      background: none;
+      font-size: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: #7a8799;
+      cursor: pointer;
+    }
+
+    .bottom-nav button span {
+      font-size: 10px;
+    }
+
+    .bottom-nav button.active {
+      color: #1e5f92;
+    }
+
+    /* ============ RESPONSIVO ============ */
+    @media (min-width: 768px) {
+      .page-view {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+
+      .topbar {
+        justify-content: space-between;
+        gap: 16px;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- PWA MANIFEST -->
+<link rel="manifest" href="?path=manifest">
+
+<!-- PWA SERVICE WORKER -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("?path=sw")
+        .then(() => console.log("SW registrado"))
+        .catch(err => console.error("Erro ao registrar SW:", err));
+    });
+  }
+</script>
+
+</head>
+
+<body class="page">
+
+  <!-- ========== LOGIN ========== -->
+  <div id="login-screen" class="login-container">
+    <div class="login-box">
+      <div class="login-logo">DV</div>
+      <div class="login-title">Despesas de Viagem</div>
+      <div class="login-subtitle">Acesse com seu usuário e senha cadastrados na aba FUNCIONARIOS.</div>
+
+      <form class="login-form" onsubmit="event.preventDefault(); realizarLogin();">
+        <input id="loginEmail" type="email" placeholder="E-mail" required />
+        <input id="loginSenha" type="password" placeholder="Senha" required />
+        <button class="btn" type="submit">Entrar</button>
+        <div id="loginErro" class="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== APP ========== -->
+  <div id="app-screen" class="hidden">
+
+    <!-- TOPO -->
+    <header class="topbar">
+      <div>
+        <h2 id="tituloUsuario">Olá!</h2>
+        <p>Resumo das suas despesas</p>
+        <div id="infoTipoUsuario" class="topbar-user"></div>
+        <div class="logout-link" onclick="logout()">Sair</div>
+      </div>
+      <div class="topbar-icon">👤</div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <main id="page-dashboard" class="page-view active">
+
+      <section class="cards-grid">
+        <div class="card card-green">
+          <h4>Saldo inicial</h4>
+          <p class="value" id="saldoInicial">R$ 0,00</p>
+        </div>
+        <div class="card card-yellow">
+          <h4>Total gasto</h4>
+          <p class="value" id="totalGasto">R$ 0,00</p>
+        </div>
+        <div class="card card-balance" id="cardSaldoAtual">
+          <h4>Saldo atual</h4>
+          <p class="value" id="saldoAtual">R$ 0,00</p>
+          <span class="tag" id="tagSaldoStatus">Dentro do limite</span>
+        </div>
+      </section>
+
+      <section class="chart-section">
+        <div class="section-header">
+          <h4>Distribuição dos gastos</h4>
+        </div>
+        <canvas id="graficoCategorias" height="180"></canvas>
+      </section>
+
+      <section class="recents">
+        <div class="section-header">
+          <h4>Últimas despesas</h4>
+        </div>
+        <div id="ultimasDespesas" class="list"></div>
+      </section>
+
+    </main>
+
+    <!-- NOVA DESPESA -->
+    <main id="page-nova" class="page-view">
+      <h2 class="subheader">Nova despesa</h2>
+
+      <form id="formDespesa" class="form" onsubmit="event.preventDefault(); salvarDespesa();">
+
+        <label>Categoria</label>
+        <select id="categoria" required></select>
+
+        <label>Valor (R$)</label>
+        <input type="number" id="valor" step="0.01" min="0" required />
+
+        <label>Data</label>
+        <input type="date" id="data" required />
+
+        <label>Descrição</label>
+        <input type="text" id="descricao" placeholder="Restaurante, Uber, Hotel..." required />
+
+        <label>Comprovante (PDF/Imagem)</label>
+        <input type="file" id="comprovante" accept="image/*,application/pdf" />
+
+        <button class="btn">Salvar</button>
+
+      </form>
+    </main>
+
+    <!-- HISTÓRICO -->
+    <main id="page-historico" class="page-view">
+      <h2 class="subheader">Histórico</h2>
+
+      <section class="filters">
+        <div id="filtroGestorWrapper" class="hidden">
+          <label>Filtrar funcionário</label>
+          <select id="filtroUsuarioGestor" onchange="aplicarFiltroGestor()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+        <label>Categoria</label>
+        <select id="filtroCategoria" onchange="renderHistorico()">
+          <option value="">Todas</option>
+        </select>
+      </section>
+
+      <section id="listaHistorico" class="list list-historico"></section>
+    </main>
+
+    <!-- EDITAR DESPESA -->
+    <main id="page-editar" class="page-view">
+      <h2 class="subheader">Editar despesa</h2>
+
+      <form id="formEditar" class="form" onsubmit="event.preventDefault(); salvarEdicao();">
+        <input type="hidden" id="editId" />
+
+        <label>Categoria</label>
+        <select id="editCategoria" required></select>
+
+        <label>Valor (R$)</label>
+        <input type="number" id="editValor" min="0" step="0.01" required />
+
+        <label>Data</label>
+        <input type="date" id="editData" required />
+
+        <label>Descrição</label>
+        <input type="text" id="editDescricao" required />
+
+        <div class="edit-actions">
+          <button class="btn" type="submit">Salvar alterações</button>
+          <button type="button" class="btn-danger" onclick="confirmarExclusaoAtual()">Excluir despesa</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- GESTÃO -->
+    <main id="page-gestao" class="page-view">
+      <h2 class="subheader">Gestão de Funcionários</h2>
+
+      <div class="gestao-card">
+        <h3>Novo / Editar funcionário</h3>
+
+        <form class="form" onsubmit="event.preventDefault(); salvarFuncionarioGestor();">
+
+          <label>E-mail</label>
+          <input type="email" id="gestorNovoEmail" required />
+
+          <label>Nome</label>
+          <input type="text" id="gestorNovoNome" required />
+
+          <label>Senha (deixe em branco para não alterar)</label>
+          <input type="password" id="gestorNovoSenha" />
+
+          <label>Saldo atual</label>
+          <input type="number" id="gestorNovoSaldo" step="0.01" />
+
+          <label>Tipo de usuário</label>
+          <select id="gestorNovoTipo">
+            <option value="FUNCIONARIO">Funcionário</option>
+            <option value="GESTOR">Gestor</option>
+          </select>
+
+          <button class="btn">Salvar funcionário</button>
+
+        </form>
+      </div>
+
+      <h3 style="margin-top: 20px; font-size: 16px;">Funcionários cadastrados</h3>
+      <div id="gestaoListaFuncionarios" class="gestao-grid"></div>
+
+    </main>
+
+    <!-- MODAL -->
+    <div id="modalExcluir" class="modal hidden">
+      <div class="modal-box">
+        <h3>Excluir despesa?</h3>
+        <p>Essa ação não pode ser desfeita.</p>
+        <div class="modal-actions">
+          <button class="btn-danger" onclick="excluirDespesaConfirmada()">Excluir</button>
+          <button class="btn-white" onclick="fecharModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU -->
+    <nav class="bottom-nav">
+      <button id="tab-dashboard" onclick="showPage('dashboard')" class="active">
+        🏠
+        <span>Dashboard</span>
+      </button>
+
+      <button id="tab-nova" onclick="showPage('nova')">
+        ➕
+        <span>Nova</span>
+      </button>
+
+      <button id="tab-historico" onclick="showPage('historico')">
+        📄
+        <span>Histórico</span>
+      </button>
+
+      <button id="tab-gestao" class="hidden" onclick="showPage('gestao')">
+        ⚙️
+        <span>Gestão</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ========== JAVASCRIPT ========== -->
+  <script>
+
+    /* ================================================
+       VARIÁVEIS GLOBAIS
+    ================================================= */
+    let CURRENT_USER = null;
+    let DESPESAS = [];
+    let FUNCIONARIOS = [];
+    let FILTRO_GESTOR_EMAIL = "";
+    let CHART = null;
+    let DESPESA_SELECIONADA_ID = null;
+
+    /* CATEGORIAS (LISTA OFICIAL) */
+    const CATEGORIAS = [
+      "Alimentação",
+      "Transporte",
+      "Hospedagem",
+      "Combustível",
+      "Pedágio",
+      "Estacionamento",
+      "Ferramentas",
+      "Materiais",
+      "Outros"
+    ];
+
+    function temBackend() {
+      return typeof google !== "undefined" && google.script && google.script.run;
+    }
+
+    /* ================================================
+       LOGIN
+    ================================================= */
+    function mostrarLogin() {
+      document.getElementById("login-screen").classList.remove("hidden");
+      document.getElementById("app-screen").classList.add("hidden");
+    }
+
+    function mostrarApp() {
+      document.getElementById("login-screen").classList.add("hidden");
+      document.getElementById("app-screen").classList.remove("hidden");
+    }
+
+    function realizarLogin() {
+      const email = document.getElementById("loginEmail").value.trim();
+      const senha = document.getElementById("loginSenha").value;
+      const divErro = document.getElementById("loginErro");
+
+      if (!email || !senha) {
+        divErro.style.display = "block";
+        divErro.textContent = "Informe e-mail e senha.";
+        return;
+      }
+
+      if (!temBackend()) {
+        alert("Este app precisa ser executado como Web App do Google Apps Script.");
+        return;
+      }
+
+      divErro.style.display = "none";
+      divErro.textContent = "";
+
+      google.script.run
+        .withSuccessHandler((dados) => {
+          if (!dados || !dados.ok) {
+            divErro.style.display = "block";
+            divErro.textContent =
+              (dados && dados.mensagem) || "Usuário ou senha inválidos.";
+            return;
+          }
+
+          CURRENT_USER = dados.usuario;
+          DESPESAS = dados.despesas || [];
+          FUNCIONARIOS = dados.funcionarios || [];
+          FILTRO_GESTOR_EMAIL = "";
+
+          iniciarApp();
+        })
+        .withFailureHandler(() => {
+          divErro.style.display = "block";
+          divErro.textContent = "Erro ao autenticar. Tente novamente.";
+        })
+        .loginUsuario(email, btoa(senha), "");
+    }
+
+    function iniciarApp() {
+      document.getElementById("tituloUsuario").textContent =
+        "Olá, " + (CURRENT_USER.nome || CURRENT_USER.email);
+
+      document.getElementById("infoTipoUsuario").textContent =
+        (CURRENT_USER.tipo || "").toUpperCase() === "GESTOR"
+          ? "Perfil: Gestor"
+          : "Perfil: Funcionário";
+
+      if ((CURRENT_USER.tipo || "").toUpperCase() === "GESTOR") {
+        document.getElementById("tab-gestao").classList.remove("hidden");
+      }
+
+      inicializarCategorias();
+      preencherFiltroGestor();
+      atualizarResumo();
+      renderDashboard();
+      renderHistorico();
+      initGrafico();
+      atualizarGrafico();
+
+      mostrarApp();
+      showPage("dashboard");
+    }
+
+    function logout() {
+      CURRENT_USER = null;
+      DESPESAS = [];
+      FUNCIONARIOS = [];
+      FILTRO_GESTOR_EMAIL = "";
+      CHART = null;
+      mostrarLogin();
+    }
+
+    /* ================================================
+       NAVEGAÇÃO ENTRE PÁGINAS
+    ================================================= */
+    function showPage(page) {
+      document
+        .querySelectorAll(".page-view")
+        .forEach((v) => v.classList.remove("active"));
+
+      document.getElementById("page-" + page).classList.add("active");
+
+      document
+        .querySelectorAll(".bottom-nav button")
+        .forEach((b) => b.classList.remove("active"));
+
+      document.getElementById("tab-" + page)?.classList.add("active");
+
+      if (page === "dashboard") {
+        atualizarResumo();
+        renderDashboard();
+        atualizarGrafico();
+      }
+
+      if (page === "historico") renderHistorico();
+      if (page === "gestao") renderGestaoFuncionarios();
+    }
+
+    /* ================================================
+       CATEGORIAS / SELECTS DINÂMICOS
+    ================================================= */
+    function inicializarCategorias() {
+      const selects = [
+        "categoria",
+        "editCategoria",
+        "filtroCategoria"
+      ];
+
+      selects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.innerHTML = "";
+
+        if (id === "filtroCategoria") {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "Todas";
+          el.appendChild(opt);
+        }
+
+        CATEGORIAS.forEach(cat => {
+          const opt = document.createElement("option");
+          opt.value = cat;
+          opt.textContent = cat;
+          el.appendChild(opt);
+        });
+      });
+    }
+
+    /* ================================================
+       DASHBOARD
+    ================================================= */
+    function atualizarResumo() {
+      let funcionarioFiltro =
+        FILTRO_GESTOR_EMAIL &&
+        FUNCIONARIOS.find(f => f.email === FILTRO_GESTOR_EMAIL);
+
+      const saldoInicial = Number(
+        funcionarioFiltro?.saldoInicial ?? CURRENT_USER.saldoInicial ?? 0
+      );
+
+      const total = DESPESAS
+        .filter(d => !FILTRO_GESTOR_EMAIL || d.usuarioEmail === FILTRO_GESTOR_EMAIL)
+        .reduce((acc, d) => acc + Number(d.valor || 0), 0);
+
+      const saldoAtual = saldoInicial - total;
+
+      document.getElementById("saldoInicial").textContent =
+        saldoInicial.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+
+      document.getElementById("totalGasto").textContent =
+        total.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+
+      document.getElementById("saldoAtual").textContent =
+        saldoAtual.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+
+      const tag = document.getElementById("tagSaldoStatus");
+
+      if (saldoAtual < 0) {
+        tag.textContent = "Saldo negativo";
+        tag.style.background = "#FCE8E6";
+        tag.style.color = "#C5221F";
+      } else if (saldoAtual <= 50) {
+        tag.textContent = "Quase no limite";
+        tag.style.background = "#FEF7E0";
+        tag.style.color = "#B06000";
+      } else {
+        tag.textContent = "Dentro do limite";
+        tag.style.background = "#E6F4EA";
+        tag.style.color = "#137333";
+      }
+    }
+
+    function renderDashboard() {
+      const cont = document.getElementById("ultimasDespesas");
+      cont.innerHTML = "";
+
+      const ultimas = DESPESAS
+        .filter(d => !FILTRO_GESTOR_EMAIL || d.usuarioEmail === FILTRO_GESTOR_EMAIL)
+        .sort((a,b)=> a.dataISO < b.dataISO ? 1 : -1)
+        .slice(0,5);
+
+      if (!ultimas.length) {
+        cont.innerHTML = "<p style='font-size:13px;color:#666;'>Nenhuma despesa cadastrada ainda.</p>";
+        return;
+      }
+
+      ultimas.forEach(d=>{
+        const div=document.createElement("div");
+        div.className="list-item";
+
+        let dataBR=new Date(d.dataISO).toLocaleDateString("pt-BR");
+        let sub = `${d.descricao} • ${dataBR}`;
+        if ((CURRENT_USER.tipo||"").toUpperCase()==="GESTOR")
+          sub += " • " + (d.usuarioNome || d.usuarioEmail);
+
+        div.innerHTML=`
+          <div class="list-item-main">
+            <span class="list-item-title">${d.categoria}</span>
+            <span class="list-item-sub">${sub}</span>
+          </div>
+          <span class="list-item-value">${Number(d.valor).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</span>
+        `;
+
+        cont.appendChild(div);
+      });
+    }
+
+    /* ================================================
+       HISTÓRICO
+    ================================================= */
+    function renderHistorico() {
+      const cont=document.getElementById("listaHistorico");
+      cont.innerHTML="";
+
+      let lista=[...DESPESAS].sort((a,b)=>a.dataISO<b.dataISO?1:-1);
+
+      if (FILTRO_GESTOR_EMAIL)
+        lista = lista.filter(d=>d.usuarioEmail===FILTRO_GESTOR_EMAIL);
+
+      const cat=document.getElementById("filtroCategoria").value;
+      if (cat) lista = lista.filter(d=>d.categoria===cat);
+
+      if (!lista.length) {
+        cont.innerHTML="<p style='font-size:13px;color:#666;'>Nenhuma despesa encontrada.</p>";
+        return;
+      }
+
+      lista.forEach(d=>{
+        const div=document.createElement("div");
+        div.className="hist-item";
+
+        let dataBR=new Date(d.dataISO).toLocaleDateString("pt-BR");
+        let sub=`${d.descricao} • ${dataBR}`;
+
+        if ((CURRENT_USER.tipo||"").toUpperCase()==="GESTOR")
+          sub += " • " + (d.usuarioNome || d.usuarioEmail);
+
+        div.innerHTML=`
+          <div class="hist-info">
+            <span class="hist-title">${d.categoria}</span>
+            <span class="hist-sub">${sub}</span>
+          </div>
+          <div class="hist-actions">
+            <span class="hist-value">${Number(d.valor).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</span>
+            <button class="btn-white" onclick="abrirEdicao(${d.id})">Editar</button>
+            <button class="btn-danger" onclick="abrirModalExcluir(${d.id})">Excluir</button>
+          </div>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function aplicarFiltroGestor() {
+      let sel=document.getElementById("filtroUsuarioGestor");
+      FILTRO_GESTOR_EMAIL = sel.value || "";
+
+      if (!temBackend()) return;
+
+      google.script.run
+        .withSuccessHandler(dados=>{
+          if (!dados.ok){ alert("Erro ao carregar."); return; }
+
+          CURRENT_USER=dados.usuario;
+          DESPESAS=dados.despesas;
+          FUNCIONARIOS=dados.funcionarios;
+
+          atualizarResumo();
+          renderDashboard();
+          renderHistorico();
+          atualizarGrafico();
+        })
+        .carregarDados(CURRENT_USER.email, FILTRO_GESTOR_EMAIL);
+    }
+
+    /* ================================================
+       NOVA DESPESA
+    ================================================= */
+    function salvarDespesa() {
+      const categoria=document.getElementById("categoria").value;
+      const valor=parseFloat(document.getElementById("valor").value);
+      const data=document.getElementById("data").value;
+      const desc=document.getElementById("descricao").value.trim();
+      const arq=document.getElementById("comprovante").files[0];
+
+      if (!categoria || !valor || !data || !desc){
+        alert("Preencha todos os campos.");
+        return;
+      }
+
+      const dados={ categoria, valor, data, descricao:desc };
+
+      const enviar=(b64,nomeArq)=>{
+        google.script.run
+          .withSuccessHandler(ret=>{
+            if (!ret.ok){ alert("Erro ao salvar"); return; }
+
+            CURRENT_USER=ret.usuario;
+            DESPESAS=ret.despesas;
+            FUNCIONARIOS=ret.funcionarios;
+
+            document.getElementById("formDespesa").reset();
+            atualizarResumo(); renderDashboard(); renderHistorico(); atualizarGrafico();
+            showPage("historico");
+          })
+          .salvarDespesaServidor(
+            CURRENT_USER.email,
+            dados,
+            b64 || "",
+            nomeArq || "",
+            FILTRO_GESTOR_EMAIL
+          );
+      };
+
+      if (arq){
+        const r=new FileReader();
+        r.onload=e=>enviar(e.target.result, arq.name);
+        r.readAsDataURL(arq);
+      } else enviar("", "");
+    }
+
+    /* ================================================
+       EDITAR
+    ================================================= */
+    function abrirEdicao(id){
+      const d=DESPESAS.find(x=>x.id==id);
+      if (!d) return;
+
+      document.getElementById("editId").value=d.id;
+      document.getElementById("editCategoria").value=d.categoria;
+      document.getElementById("editValor").value=d.valor;
+      document.getElementById("editData").value=d.dataISO;
+      document.getElementById("editDescricao").value=d.descricao;
+
+      showPage("editar");
+    }
+
+    function salvarEdicao(){
+      const dados={
+        id: document.getElementById("editId").value,
+        categoria: document.getElementById("editCategoria").value,
+        valor: parseFloat(document.getElementById("editValor").value),
+        data: document.getElementById("editData").value,
+        descricao: document.getElementById("editDescricao").value.trim()
+      };
+
+      google.script.run
+        .withSuccessHandler(ret=>{
+          if (!ret.ok){ alert("Erro"); return; }
+
+          CURRENT_USER=ret.usuario;
+          DESPESAS=ret.despesas;
+
+          showPage("historico");
+          renderHistorico();
+          atualizarResumo();
+        })
+        .editarDespesaServidor(
+          CURRENT_USER.email,
+          dados,
+          FILTRO_GESTOR_EMAIL
+        );
+    }
+
+    /* ================================================
+       EXCLUSÃO
+    ================================================= */
+    function abrirModalExcluir(id){
+      DESPESA_SELECIONADA_ID=id;
+      document.getElementById("modalExcluir").classList.remove("hidden");
+    }
+
+    function fecharModal(){
+      DESPESA_SELECIONADA_ID=null;
+      document.getElementById("modalExcluir").classList.add("hidden");
+    }
+
+    function excluirDespesaConfirmada(){
+      if (!DESPESA_SELECIONADA_ID) return;
+
+      google.script.run
+        .withSuccessHandler(ret=>{
+          if (!ret.ok){ alert("Erro"); return; }
+
+          CURRENT_USER=ret.usuario; DESPESAS=ret.despesas;
+          fecharModal(); renderHistorico(); atualizarResumo(); atualizarGrafico();
+        })
+        .excluirDespesaServidor(
+          CURRENT_USER.email,
+          DESPESA_SELECIONADA_ID,
+          FILTRO_GESTOR_EMAIL
+        );
+    }
+
+    /* ================================================
+       GESTÃO DE FUNCIONÁRIOS
+    ================================================= */
+    function preencherFiltroGestor(){
+      const wrap=document.getElementById("filtroGestorWrapper");
+      const sel=document.getElementById("filtroUsuarioGestor");
+
+      sel.innerHTML="<option value=''>Todos</option>";
+
+      if ((CURRENT_USER.tipo||"").toUpperCase()!=="GESTOR"){
+        wrap.classList.add("hidden"); return;
+      }
+
+      wrap.classList.remove("hidden");
+
+      FUNCIONARIOS.forEach(f=>{
+        const opt=document.createElement("option");
+        opt.value=f.email;
+        opt.textContent=`${f.nome} (${f.email})`;
+        sel.appendChild(opt);
+      });
+
+      renderGestaoFuncionarios();
+    }
+
+    function renderGestaoFuncionarios(){
+      const c=document.getElementById("gestaoListaFuncionarios");
+      c.innerHTML="";
+
+      if (!FUNCIONARIOS.length){
+        c.innerHTML="<p style='font-size:13px;color:#666;'>Nenhum funcionário.</p>";
+        return;
+      }
+
+      FUNCIONARIOS.forEach(f=>{
+        const div=document.createElement("div");
+        div.className="gestao-item";
+
+        div.innerHTML=`
+          <div class="gestao-item-main">
+            <b>${f.nome}</b><br/>
+            <small>${f.email}</small><br/>
+            <small>Tipo: ${f.tipo}</small><br/>
+            <small>Saldo: ${Number(f.saldoInicial||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</small>
+          </div>
+          <div class="gestao-item-actions">
+            <button class="btn-white" onclick="editarFuncionarioGestor('${f.email}')">Editar</button>
+            <button class="btn-danger" onclick="excluirFuncionarioGestor('${f.email}')">Excluir</button>
+          </div>
+        `;
+        c.appendChild(div);
+      });
+    }
+
+    function editarFuncionarioGestor(email){
+      const f=FUNCIONARIOS.find(x=>x.email===email);
+      if (!f) return;
+
+      document.getElementById("gestorNovoEmail").value=f.email;
+      document.getElementById("gestorNovoNome").value=f.nome;
+      document.getElementById("gestorNovoSaldo").value=f.saldoInicial ?? "";
+      document.getElementById("gestorNovoTipo").value=f.tipo;
+      document.getElementById("gestorNovoSenha").value="";
+
+      showPage("gestao");
+    }
+
+    function salvarFuncionarioGestor(){
+      const email=document.getElementById("gestorNovoEmail").value.trim();
+      const nome=document.getElementById("gestorNovoNome").value.trim();
+      const senha=document.getElementById("gestorNovoSenha").value;
+      const saldo=document.getElementById("gestorNovoSaldo").value;
+      const tipo=document.getElementById("gestorNovoTipo").value;
+
+      const obj={
+        email,
+        nome,
+        tipo,
+        senhaBase64: senha? btoa(senha):"",
+        saldoAtual: saldo===""? null: Number(saldo)
+      };
+
+      google.script.run
+        .withSuccessHandler(ret=>{
+          if (!ret.ok){ alert(ret.mensagem||"Erro"); return; }
+
+          FUNCIONARIOS=ret.funcionarios;
+          preencherFiltroGestor();
+          alert("Funcionário salvo!");
+        })
+        .gestaoSalvarUsuario(CURRENT_USER.email, obj);
+    }
+
+    function excluirFuncionarioGestor(email){
+      if (!confirm("Excluir usuário?")) return;
+
+      google.script.run
+        .withSuccessHandler(ret=>{
+          if (!ret.ok){ alert("Erro"); return; }
+
+          FUNCIONARIOS=ret.funcionarios;
+          preencherFiltroGestor();
+        })
+        .gestaoExcluirUsuario(CURRENT_USER.email, email);
+    }
+
+    /* ================================================
+       GRÁFICO
+    ================================================= */
+    function initGrafico(){
+      const ctx=document.getElementById("graficoCategorias");
+      if (CHART) CHART.destroy();
+
+      CHART=new Chart(ctx,{
+        type:"doughnut",
+        data:{
+          labels: CATEGORIAS,
+          datasets:[{
+            data: Array(CATEGORIAS.length).fill(0),
+            backgroundColor:[
+              "#1E88E5","#43A047","#FB8C00","#8E24AA","#00ACC1",
+              "#F06292","#FFD54F","#A1887F","#B39DDB"
+            ]
+          }]
+        },
+        options:{
+          plugins:{
+            legend:{
+              position:"bottom",
+              labels:{boxWidth:12,boxHeight:12}
+            }
+          },
+          cutout:"55%"
+        }
+      });
+    }
+
+    function atualizarGrafico(){
+      if (!CHART) return;
+
+      const valores = CATEGORIAS.map(cat =>
+        DESPESAS
+          .filter(d => d.categoria===cat)
+          .filter(d => !FILTRO_GESTOR_EMAIL || d.usuarioEmail===FILTRO_GESTOR_EMAIL)
+          .reduce((a,b)=>a+Number(b.valor||0),0)
+      );
+
+      CHART.data.datasets[0].data = valores;
+      CHART.update();
+    }
+
+    /* ================================================
+       START
+    ================================================= */
+    window.onload = function(){
+      inicializarCategorias();
+      mostrarLogin();
+    };
+
+  </script>
+
+</body>
+</html>
