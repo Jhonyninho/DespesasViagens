@@ -523,13 +523,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- PWA MANIFEST -->
-<link rel="manifest" href="?path=manifest">
+<link rel="manifest" href="manifest.json">
 
 <!-- PWA SERVICE WORKER -->
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("?path=sw")
+      navigator.serviceWorker.register("service-worker.js")
         .then(() => console.log("SW registrado"))
         .catch(err => console.error("Erro ao registrar SW:", err));
     });
