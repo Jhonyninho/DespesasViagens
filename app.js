@@ -3,7 +3,7 @@
 */
 
 /* --------------------- CONFIG --------------------- */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvNjdVPhvpAoEzEpNN8BuyV8ZXkyOWC-ab5QtDcpwvvAg0LsHSn_l4zchI-sNC3jlcMA/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqT2yuD408ZkLCiSnu9M0lV6wHXFIF0L9009MmP891UYmZQF_gtEKfv6desdURxw0/exec"
 /* --------------------- FIM CONFIG --------------------- */
 
 let CURRENT_USER = null;
@@ -612,3 +612,4 @@ window.onload = function(){
   inicializarCategorias();
   mostrarLogin();
 };
+
