@@ -1,11 +1,10 @@
 {
-  "name": "Farmalog Viagens",
-  "short_name": "Viagens",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Despesas de Viagem",
+  "short_name": "Despesas",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1e5f92",
-  "theme_color": "#1e5f92",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "icon-192.png",
