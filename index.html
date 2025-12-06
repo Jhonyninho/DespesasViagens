@@ -4,244 +4,361 @@
   <meta charset="UTF-8" />
   <title>Despesas de Viagem</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
 
-  <!-- PWA MANIFEST -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- SERVICE WORKER REGISTRATION -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js")
-          .then(() => console.log("SW registrado"))
-          .catch(err => console.error("Erro ao registrar SW:", err));
-      });
-    }
-  </script>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
 </head>
+<body>
+  <div id="app">
 
-<body class="page">
-
-  <!-- ========== LOGIN ========== -->
-  <div id="login-screen" class="login-container">
-    <div class="login-box">
-      <div class="login-logo">DV</div>
-      <div class="login-title">Despesas de Viagem</div>
-      <div class="login-subtitle">Acesse com seu usuário e senha cadastrados na aba FUNCIONARIOS.</div>
-
-      <form class="login-form" onsubmit="event.preventDefault(); realizarLogin();">
-        <input id="loginEmail" type="email" placeholder="E-mail" required />
-        <input id="loginSenha" type="password" placeholder="Senha" required />
-        <button class="btn" type="submit">Entrar</button>
-        <div id="loginErro" class="login-error"></div>
+    <!-- LOGIN -->
+    <section id="login-section" class="screen active">
+      <h1 class="app-title">Despesas de Viagem</h1>
+      <form id="login-form" class="card">
+        <label>
+          Login
+          <input type="text" id="login-username" required />
+        </label>
+        <label>
+          Senha
+          <input type="password" id="login-password" required />
+        </label>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <p id="login-error" class="alert alert-error hidden"></p>
       </form>
-    </div>
+    </section>
+
+    <!-- APP PRINCIPAL -->
+    <section id="main-section" class="screen hidden">
+      <!-- Header / Info usuário -->
+      <header class="topbar">
+        <div>
+          <h2 id="user-name"></h2>
+          <small id="user-role"></small>
+        </div>
+        <button id="btn-logout" class="btn btn-outline">Sair</button>
+      </header>
+
+      <!-- CONTEÚDO (seções) -->
+      <main id="content">
+
+        <!-- DASHBOARD -->
+        <section id="tab-dashboard" class="tab active">
+          <div class="dashboard-header">
+            <h3>Dashboard</h3>
+            <button id="btn-dashboard-refresh" class="btn btn-outline small">
+              Atualizar Dados
+            </button>
+          </div>
+
+          <div class="card metric-card">
+            <p class="metric-label">Saldo Atual</p>
+            <p id="dash-saldo-atual" class="metric-value">R$ 0,00</p>
+          </div>
+
+          <div class="card metric-card">
+            <p class="metric-label">Saldo Recebido</p>
+            <p id="dash-saldo-recebido" class="metric-value">R$ 0,00</p>
+          </div>
+
+          <div class="card metric-card">
+            <p class="metric-label">Total Gasto</p>
+            <p id="dash-total-gasto" class="metric-value">R$ 0,00</p>
+          </div>
+
+          <div class="card">
+            <p><strong>Resumo:</strong></p>
+            <ul id="dashboard-summary" class="summary-list">
+              <li>Nenhuma informação ainda.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- REGISTRAR DESPESA -->
+        <section id="tab-expense" class="tab hidden">
+          <h3>Registrar Despesa</h3>
+          <form id="expense-form" class="card">
+            <label>
+              Tipo de Despesa
+              <select id="expense-type" required>
+                <option value="">Selecione</option>
+                <option value="TRANSPORTE">Transporte</option>
+                <option value="ALIMENTACAO">Alimentação</option>
+                <option value="HOSPEDAGEM">Hospedagem</option>
+                <option value="OUTROS">Outros</option>
+              </select>
+            </label>
+
+            <label>
+              Data
+              <input type="date" id="expense-date" required />
+            </label>
+
+            <label>
+              Valor
+              <input type="number" step="0.01" id="expense-value" required />
+            </label>
+
+            <label>
+              Descrição
+              <textarea id="expense-description" rows="3"></textarea>
+            </label>
+
+            <label>
+              Comprovante (foto/pdf)
+              <input type="file" id="expense-file" accept="image/*,application/pdf" />
+            </label>
+
+            <button type="submit" class="btn btn-primary">Salvar Despesa</button>
+            <p id="expense-message" class="alert hidden"></p>
+          </form>
+        </section>
+
+        <!-- CONSULTA DE DESPESAS (Usuário e Gestor) -->
+        <section id="tab-query" class="tab hidden">
+          <h3>Consulta de Despesas</h3>
+
+          <div class="card">
+            <form id="query-form">
+              <div class="grid-2">
+                <label>
+                  Categoria
+                  <select id="query-type">
+                    <option value="">Todas</option>
+                    <option value="TRANSPORTE">Transporte</option>
+                    <option value="ALIMENTACAO">Alimentação</option>
+                    <option value="HOSPEDAGEM">Hospedagem</option>
+                    <option value="OUTROS">Outros</option>
+                  </select>
+                </label>
+                <label class="only-manager" id="query-employee-wrapper">
+                  Colaborador
+                  <select id="query-employee">
+                    <option value="">Todos</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="grid-2">
+                <label>
+                  Data Inicial
+                  <input type="date" id="query-start-date" />
+                </label>
+                <label>
+                  Data Final
+                  <input type="date" id="query-end-date" />
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h4>Resultados</h4>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Colaborador</th>
+                    <th>Valor</th>
+                  </tr>
+                </thead>
+                <tbody id="query-table-body">
+                  <tr><td colspan="4">Nenhum registro.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <small>Toque em uma linha para ver detalhes.</small>
+          </div>
+
+          <!-- Detalhe / Edição de Despesa (modelo B) -->
+          <div class="card hidden" id="expense-detail-card">
+            <h4>Detalhes da Despesa</h4>
+            <p class="detail-subtitle" id="detail-employee-info"></p>
+
+            <form id="expense-detail-form">
+              <input type="hidden" id="detail-expense-id" />
+
+              <label>
+                Tipo de Despesa
+                <select id="detail-expense-type" required>
+                  <option value="TRANSPORTE">Transporte</option>
+                  <option value="ALIMENTACAO">Alimentação</option>
+                  <option value="HOSPEDAGEM">Hospedagem</option>
+                  <option value="OUTROS">Outros</option>
+                </select>
+              </label>
+
+              <label>
+                Data
+                <input type="date" id="detail-expense-date" required />
+              </label>
+
+              <label>
+                Valor
+                <input type="number" step="0.01" id="detail-expense-value" required />
+              </label>
+
+              <label>
+                Descrição
+                <textarea id="detail-expense-description" rows="3"></textarea>
+              </label>
+
+              <label>
+                Novo Comprovante (opcional)
+                <input type="file" id="detail-expense-file" accept="image/*,application/pdf" />
+              </label>
+
+              <div class="detail-buttons">
+                <button type="submit" class="btn btn-primary" id="btn-detail-save">
+                  Salvar Alterações
+                </button>
+                <button type="button" class="btn btn-danger" id="btn-detail-delete">
+                  Excluir Despesa
+                </button>
+              </div>
+
+              <p id="detail-expense-message" class="alert hidden"></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- SALDO (GESTOR) -->
+        <section id="tab-balance" class="tab hidden">
+          <h3>Saldo por Colaborador</h3>
+          <div class="card">
+            <button id="btn-refresh-balances" class="btn btn-primary">Atualizar Saldos</button>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Crédito</th>
+                    <th>Débito</th>
+                    <th>Saldo</th>
+                  </tr>
+                </thead>
+                <tbody id="balance-table-body">
+                  <tr><td colspan="4">Nenhum registro</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>Adicionar Crédito</h4>
+            <form id="balance-form">
+              <label>
+                Colaborador
+                <select id="balance-employee" required></select>
+              </label>
+              <label>
+                Valor
+                <input type="number" step="0.01" id="balance-value" required />
+              </label>
+              <label>
+                Descrição (opcional)
+                <input type="text" id="balance-description" />
+              </label>
+              <button type="submit" class="btn btn-primary">Lançar Crédito</button>
+              <p id="balance-message" class="alert hidden"></p>
+            </form>
+          </div>
+        </section>
+
+        <!-- USUÁRIO (GESTOR) -->
+        <section id="tab-user" class="tab hidden">
+          <h3>Gestão de Usuários</h3>
+
+          <div class="card">
+            <h4>Novo Usuário</h4>
+            <form id="user-form">
+              <label>
+                Login
+                <input type="text" id="user-login" required />
+              </label>
+              <label>
+                Nome
+                <input type="text" id="user-name-input" required />
+              </label>
+              <label>
+                Senha
+                <input type="password" id="user-password" required />
+              </label>
+              <label>
+                Perfil
+                <select id="user-role-select" required>
+                  <option value="USUARIO">Usuário</option>
+                  <option value="GESTOR">Gestor</option>
+                </select>
+              </label>
+              <button type="submit" class="btn btn-primary">Criar Usuário</button>
+              <p id="user-message" class="alert hidden"></p>
+            </form>
+          </div>
+
+          <div class="card">
+            <h4>Colaboradores</h4>
+            <ul id="employee-list" class="summary-list clickable">
+              <li>Nenhum usuário ainda.</li>
+            </ul>
+            <small>Toque em um usuário para editar.</small>
+          </div>
+
+          <div class="card hidden" id="edit-user-card">
+            <h4>Editar Usuário</h4>
+            <form id="edit-user-form">
+              <input type="hidden" id="edit-user-id" />
+
+              <label>
+                Login
+                <input type="text" id="edit-user-login" required />
+              </label>
+              <label>
+                Nome
+                <input type="text" id="edit-user-name" required />
+              </label>
+              <label>
+                Nova Senha (opcional)
+                <input type="password" id="edit-user-password" />
+              </label>
+              <label>
+                Perfil
+                <select id="edit-user-role" required>
+                  <option value="USUARIO">Usuário</option>
+                  <option value="GESTOR">Gestor</option>
+                </select>
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="edit-user-active" />
+                Usuário Ativo
+              </label>
+
+              <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+              <p id="edit-user-message" class="alert hidden"></p>
+            </form>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- NAVEGAÇÃO DE RODAPÉ -->
+      <nav class="bottombar">
+        <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-btn" data-tab="expense">Despesa</button>
+        <button class="nav-btn" data-tab="query">Consulta</button>
+        <button class="nav-btn only-manager" data-tab="balance">Saldo</button>
+        <button class="nav-btn only-manager" data-tab="user">Usuário</button>
+      </nav>
+    </section>
+
   </div>
 
-  <!-- ========== APP ========== -->
-  <div id="app-screen" class="hidden">
-
-    <!-- TOPO -->
-    <header class="topbar">
-      <div>
-        <h2 id="tituloUsuario">Olá!</h2>
-        <p>Resumo das suas despesas</p>
-        <div id="infoTipoUsuario" class="topbar-user"></div>
-        <div class="logout-link" onclick="logout()">Sair</div>
-      </div>
-      <div class="topbar-icon">👤</div>
-    </header>
-
-    <!-- DASHBOARD -->
-    <main id="page-dashboard" class="page-view active">
-
-      <section class="cards-grid">
-        <div class="card card-green">
-          <h4>Saldo inicial</h4>
-          <p class="value" id="saldoInicial">R$ 0,00</p>
-        </div>
-        <div class="card card-yellow">
-          <h4>Total gasto</h4>
-          <p class="value" id="totalGasto">R$ 0,00</p>
-        </div>
-        <div class="card card-balance" id="cardSaldoAtual">
-          <h4>Saldo atual</h4>
-          <p class="value" id="saldoAtual">R$ 0,00</p>
-          <span class="tag" id="tagSaldoStatus">Dentro do limite</span>
-        </div>
-      </section>
-
-      <section class="chart-section">
-        <div class="section-header">
-          <h4>Distribuição dos gastos</h4>
-        </div>
-        <canvas id="graficoCategorias" height="180"></canvas>
-      </section>
-
-      <section class="recents">
-        <div class="section-header">
-          <h4>Últimas despesas</h4>
-        </div>
-        <div id="ultimasDespesas" class="list"></div>
-      </section>
-
-    </main>
-
-    <!-- NOVA DESPESA -->
-    <main id="page-nova" class="page-view">
-      <h2 class="subheader">Nova despesa</h2>
-
-      <form id="formDespesa" class="form" onsubmit="event.preventDefault(); salvarDespesa();">
-
-        <label>Categoria</label>
-        <select id="categoria" required></select>
-
-        <label>Valor (R$)</label>
-        <input type="number" id="valor" step="0.01" min="0" required />
-
-        <label>Data</label>
-        <input type="date" id="data" required />
-
-        <label>Descrição</label>
-        <input type="text" id="descricao" placeholder="Restaurante, Uber, Hotel..." required />
-
-        <label>Comprovante (PDF/Imagem)</label>
-        <input type="file" id="comprovante" accept="image/*,application/pdf" />
-
-        <button class="btn">Salvar</button>
-
-      </form>
-    </main>
-
-    <!-- HISTÓRICO -->
-    <main id="page-historico" class="page-view">
-      <h2 class="subheader">Histórico</h2>
-
-      <section class="filters">
-        <div id="filtroGestorWrapper" class="hidden">
-          <label>Filtrar funcionário</label>
-          <select id="filtroUsuarioGestor" onchange="aplicarFiltroGestor()">
-            <option value="">Todos</option>
-          </select>
-        </div>
-
-        <label>Categoria</label>
-        <select id="filtroCategoria" onchange="renderHistorico()">
-          <option value="">Todas</option>
-        </select>
-      </section>
-
-      <section id="listaHistorico" class="list list-historico"></section>
-    </main>
-
-    <!-- EDITAR DESPESA -->
-    <main id="page-editar" class="page-view">
-      <h2 class="subheader">Editar despesa</h2>
-
-      <form id="formEditar" class="form" onsubmit="event.preventDefault(); salvarEdicao();">
-        <input type="hidden" id="editId" />
-
-        <label>Categoria</label>
-        <select id="editCategoria" required></select>
-
-        <label>Valor (R$)</label>
-        <input type="number" id="editValor" min="0" step="0.01" required />
-
-        <label>Data</label>
-        <input type="date" id="editData" required />
-
-        <label>Descrição</label>
-        <input type="text" id="editDescricao" required />
-
-        <div class="edit-actions">
-          <button class="btn" type="submit">Salvar alterações</button>
-          <button type="button" class="btn-danger" onclick="confirmarExclusaoAtual()">Excluir despesa</button>
-        </div>
-      </form>
-    </main>
-
-    <!-- GESTÃO -->
-    <main id="page-gestao" class="page-view">
-      <h2 class="subheader">Gestão de Funcionários</h2>
-
-      <div class="gestao-card">
-        <h3>Novo / Editar funcionário</h3>
-
-        <form class="form" onsubmit="event.preventDefault(); salvarFuncionarioGestor();">
-
-          <label>E-mail</label>
-          <input type="email" id="gestorNovoEmail" required />
-
-          <label>Nome</label>
-          <input type="text" id="gestorNovoNome" required />
-
-          <label>Senha (deixe em branco para não alterar)</label>
-          <input type="password" id="gestorNovoSenha" />
-
-          <label>Saldo atual</label>
-          <input type="number" id="gestorNovoSaldo" step="0.01" />
-
-          <label>Tipo de usuário</label>
-          <select id="gestorNovoTipo">
-            <option value="FUNCIONARIO">Funcionário</option>
-            <option value="GESTOR">Gestor</option>
-          </select>
-
-          <button class="btn">Salvar funcionário</button>
-
-        </form>
-      </div>
-
-      <h3 style="margin-top: 20px; font-size: 16px;">Funcionários cadastrados</h3>
-      <div id="gestaoListaFuncionarios" class="gestao-grid"></div>
-
-    </main>
-
-    <!-- MODAL -->
-    <div id="modalExcluir" class="modal hidden">
-      <div class="modal-box">
-        <h3>Excluir despesa?</h3>
-        <p>Essa ação não pode ser desfeita.</p>
-        <div class="modal-actions">
-          <button class="btn-danger" onclick="excluirDespesaConfirmada()">Excluir</button>
-          <button class="btn-white" onclick="fecharModal()">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MENU -->
-    <nav class="bottom-nav">
-      <button id="tab-dashboard" onclick="showPage('dashboard')" class="active">
-        🏠
-        <span>Dashboard</span>
-      </button>
-
-      <button id="tab-nova" onclick="showPage('nova')">
-        ➕
-        <span>Nova</span>
-      </button>
-
-      <button id="tab-historico" onclick="showPage('historico')">
-        📄
-        <span>Histórico</span>
-      </button>
-
-      <button id="tab-gestao" class="hidden" onclick="showPage('gestao')">
-        ⚙️
-        <span>Gestão</span>
-      </button>
-    </nav>
-
-  </div>
-
-  <!-- APP JS -->
   <script src="app.js"></script>
-
 </body>
 </html>
