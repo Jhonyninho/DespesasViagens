@@ -789,4 +789,3 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(err => console.error('SW error:', err));
   }
 });
-
