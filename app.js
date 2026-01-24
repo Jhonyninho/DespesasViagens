@@ -242,8 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(err);
     }
   }
-
-  // ========== REGISTRO DE DESPESA ==========
+    // ========== REGISTRO DE DESPESA ==========
   expenseForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if (!currentUser) return;
@@ -252,7 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
     expenseMsg.textContent = '';
 
     const tipo = document.getElementById('expense-type').value;
-    const dataISO = document.getElementById('expense-date').value;
+
+    const dataInput = document.getElementById('expense-date').value; // YYYY-MM-DD
+    let dataBR = '';
+
+    if (dataInput) {
+      const [ano, mes, dia] = dataInput.split('-');
+      dataBR = `${dia}/${mes}/${ano}`; // DD/MM/AAAA
+    }
+
     const valor = document.getElementById('expense-value').value;
     const descricao = document.getElementById('expense-description').value;
     const fileInput = document.getElementById('expense-file');
@@ -274,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userId: currentUser.id,
         userName: currentUser.nome,
         tipo,
-        dataISO,
+        dataBR,          // ✅ DATA BR SEM HORA
         valor,
         descricao,
         base64,
@@ -299,15 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (e) => reject(e);
-      reader.readAsDataURL(file);
-    });
-  }
-
+  
   // ========== SALDOS (GESTOR) ==========
   btnRefreshBalances.addEventListener('click', () => {
     refreshBalances().catch(console.error);
@@ -672,7 +671,14 @@ document.addEventListener('DOMContentLoaded', () => {
     detailMsg.textContent = '';
 
     const tipo = detailTipo.value;
-    const dataISO = detailData.value;
+    const dataInput = detailData.value; // YYYY-MM-DD
+    let dataBR = '';
+
+    if (dataInput) {
+      const [ano, mes, dia] = dataInput.split('-');
+      dataBR = `${dia}/${mes}/${ano}`;
+    }
+
     const valor = detailValor.value;
     const descricao = detailDesc.value;
     const file = detailFile.files[0];
@@ -694,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userId: selectedExpense.employeeId,
         userName: selectedExpense.employeeName,
         tipo,
-        dataISO,
+        dataBR,
         valor,
         descricao,
         base64,
