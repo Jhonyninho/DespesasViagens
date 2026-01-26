@@ -760,6 +760,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ========== FILE TO BASE64 ==========
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve(null);
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+
+    reader.onerror = (err) => {
+      reject(err);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+
   // ========== FORMATOS E UTIL ==========
   function formatCurrency(num) {
     const n = Number(num || 0);
